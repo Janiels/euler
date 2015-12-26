@@ -20,11 +20,11 @@ module Problem3 =
     let isPrime (n : int) =
         if n % 2 = 0 then false
         else
-            let root = int (ceil (sqrt (float n)))
+            let root = int (sqrt (float n))
             seq {3..2..root} |> Seq.forall (fun i -> n % i <> 0)
 
     let num = 600851475143L
-    let root = int (ceil (sqrt (float num)))
+    let root = int (sqrt (float num))
     let largest =
         seq {2..root}
         |> Seq.filter (fun i -> num % (int64 i) = 0L)
@@ -83,7 +83,7 @@ module Problem7 =
     let isPrime n =
         if n % 2 = 0 then false
         else
-            let root = int (ceil (sqrt (float n)))
+            let root = int (sqrt (float n))
             seq {3..2..root} |> Seq.forall (fun i -> n % i <> 0)
 
     let prime =
@@ -100,7 +100,7 @@ module Problem8 =
         nums
         |> Seq.map (fun c -> int64 (string c))
         |> Seq.windowed 13
-        |> Seq.map(fun window -> window |> Seq.fold (fun cur value -> cur * value) 1L)
+        |> Seq.map(fun window -> window |> Seq.fold (*) 1L)
         |> Seq.max
 
     printfn "Problem 8: %A" largest
@@ -128,7 +128,7 @@ module Problem10 =
         if n = 2 then true
         elif n % 2 = 0 then false
         else
-            let root = int (ceil (sqrt (float n)))
+            let root = int (sqrt (float n))
             seq {3..2..root} |> Seq.forall (fun i -> n % i <> 0)
 
     let sum =
@@ -436,9 +436,6 @@ module Problem18And67 =
             treeString.Split ('\n')
             |> Array.map (fun line -> (line.Split (' ') |> Array.map (fun s -> (int s))))
 
-        let bestPathLengths =
-            seq { 0.. tree.Length - 1 }
-            |> 
         let rec bestTo =
             let dict = System.Collections.Generic.Dictionary<_, _>()
             fun curX curY ->
@@ -459,7 +456,7 @@ module Problem18And67 =
         |> Seq.map (fun i -> (bestTo i (tree.Length - 1)))
         |> Seq.max
 
-    let prob18result = (bestRoute tree18)
+    let prob18result = bestRoute tree18
     printfn "Problem 18: %A" prob18result
 
     let tree67 = "59
@@ -563,8 +560,54 @@ module Problem18And67 =
 30 11 85 31 34 71 13 48 05 14 44 03 19 67 23 73 19 57 06 90 94 72 57 69 81 62 59 68 88 57 55 69 49 13 07 87 97 80 89 05 71 05 05 26 38 40 16 62 45 99 18 38 98 24 21 26 62 74 69 04 85 57 77 35 58 67 91 79 79 57 86 28 66 34 72 51 76 78 36 95 63 90 08 78 47 63 45 31 22 70 52 48 79 94 15 77 61 67 68
 23 33 44 81 80 92 93 75 94 88 23 61 39 76 22 03 28 94 32 06 49 65 41 34 18 23 08 47 62 60 03 63 33 13 80 52 31 54 73 43 70 26 16 69 57 87 83 31 03 93 70 81 47 95 77 44 29 68 39 51 56 59 63 07 25 70 07 77 43 53 64 03 94 42 95 39 18 01 66 21 16 97 20 50 90 16 70 10 95 69 29 06 25 61 41 26 15 59 63 35"
 
-    let prob67result = (bestRoute tree67)
+    let prob67result = bestRoute tree67
     printfn "Problem 67: %A" prob67result
 
-//module Problem19 =
-    
+module Problem19 =
+    let firsts =
+        seq { 1901..2000 }
+        |> Seq.collect (fun year -> seq { 1..12 } |> Seq.map (fun month -> System.DateTime (year, month, 1)))
+
+    let count =
+        firsts
+        |> Seq.filter (fun d -> d.DayOfWeek = System.DayOfWeek.Sunday)
+        |> Seq.length
+
+    printfn "Problem 19: %A" count
+
+module Problem20 =
+    let fac n =
+        seq { 1I..n }
+        |> Seq.fold (*) 1I
+
+    let result =
+        fac 100I
+        |> string
+        |> Seq.map (fun c -> int (string c))
+        |> Seq.sum
+
+    printfn "Problem 20: %A" result
+
+module Problem21 =
+    let properDivisors n =
+        let bound = int (sqrt (float n))
+        seq { 2..bound }
+        |> Seq.filter (fun i -> n % i = 0)
+        |> Seq.collect (fun i -> seq { yield i; yield n / i })
+        |> Seq.append [1]
+        |> Seq.distinct
+
+    let sumOfProperDivisors n =
+        properDivisors n
+        |> Seq.sum
+
+    let isAmicable n =
+        let sum = sumOfProperDivisors n
+        sum <> n && sumOfProperDivisors sum = n
+
+    let result =
+        seq { 1..9999 }
+        |> Seq.filter isAmicable
+        |> Seq.sum
+
+    printfn "Problem 21: %A" result

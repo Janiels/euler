@@ -316,7 +316,7 @@ module Problem19 =
 module Problem20 =
     let fac n =
         seq { 1I..n }
-        |> Seq.fold (*) 1I
+        |> Seq.reduce (*)
 
     let answer =
         fac 100I
@@ -419,3 +419,35 @@ module Problem25 =
         fibs
         |> Seq.findIndex (fun n -> (String.length (string n)) = 1000)
         |> (+) 1
+
+module Problem75 =
+    // https://en.wikipedia.org/wiki/Tree_of_primitive_Pythagorean_triples
+    let pythagoreanTriplesBelow num =
+        let rec enumerate (a, b, c) =
+            seq {
+                if a + b + c <= num then
+                    let nextScaled ((a, b, c), i) =
+                        if (a + b + c) * i <= num then
+                            Some((a * i, b * i, c * i), ((a, b, c), i + 1))
+                        else
+                            None
+
+                    yield! Seq.unfold nextScaled ((a, b, c), 1)
+
+                    let a1, b1, c1 = a + -2 * b + 2 * c, 2 * a + -b + 2 * c, 2 * a + -2 * b + 3 * c
+                    yield! enumerate (a1, b1, c1)
+
+                    let a2, b2, c2 = a + 2 * b + 2 * c, 2 * a + b + 2 * c, 2 * a + 2 * b + 3 * c
+                    yield! enumerate (a2, b2, c2)
+
+                    let a3, b3, c3 = -1 * a + 2 * b + 2 * c, -2 * a + b + 2 * c, -2 * a + 2 * b + 3 * c
+                    yield! enumerate (a3, b3, c3)
+            }
+
+        enumerate (3, 4, 5)
+
+    let answer =
+        pythagoreanTriplesBelow 1500000
+        |> Seq.groupBy (fun (a, b, c) -> a + b + c)
+        |> Seq.filter (fun (sum, triples) -> (triples |> Seq.length) = 1)
+        |> Seq.length

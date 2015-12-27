@@ -420,6 +420,112 @@ module Problem25 =
         |> Seq.findIndex (fun n -> (String.length (string n)) = 1000)
         |> (+) 1
 
+module Problem26 =
+    let periodLength n =
+        let rec periodLengthWithHistory rest (history : Map<int, int>) index =
+            match history.TryFind rest with
+            | Some i -> index - i
+            | None ->
+                let nextRest = rest * 10 % n
+                if nextRest = 0 then
+                    0
+                else
+                    periodLengthWithHistory nextRest (history.Add(rest, index)) (index + 1)
+
+        periodLengthWithHistory 1 Map.empty 0
+
+    let answer =
+        seq { 1..999 }
+        |> Seq.maxBy periodLength
+
+module Problem27 =
+    let sieve (n:int) =
+        let arr = (Array.init n (fun i -> true))
+        arr.[0] <- false
+        arr.[1] <- false
+        for i = 2 to n do
+            let mutable j = 2
+            while i * j < n do
+                arr.[i * j] <- false
+                j <- j + 1
+
+        arr
+
+    let primes = sieve 100000
+
+    let isPrime n =
+        if n < 0 then
+            false
+        else
+            primes.[n]
+
+    let numPrimesProduced func =
+        Seq.initInfinite id
+        |> Seq.map func
+        |> Seq.takeWhile isPrime
+        |> Seq.length
+
+    let quadratic a b n = n * n + a * n + b
+
+    let a, b =
+        seq { -999..999 }
+        |> Seq.collect (fun i -> seq { -999..999 } |> Seq.map (fun j -> (i, j)))
+        |> Seq.maxBy (fun (i, j) -> numPrimesProduced (quadratic i j))
+
+    let answer = a * b
+
+module Problem28 =
+    // It can be seen that each diagonal grows by an additional 8 each time. For example
+    // the right lower corner has values 1, 3, 13, 31, 57 which are differences of
+    // 2, 10, 18, 26. The left lower corner has 1, 5, 17, 37 = 4, 12, 20
+
+    // 21 22 23 24 25
+    // 20  7  8  9 10
+    // 19  6  1  2 11
+    // 18  5  4  3 12
+    // 17 16 15 14 13
+    let diagonals start =
+        Seq.unfold (fun (cur, growth) -> Some(cur, (cur + growth, growth + 8))) (start, 8 + start - 1)
+
+    let diagonalSum start amount =
+        diagonals start
+        |> Seq.take amount
+        |> Seq.sum
+
+    let answer =
+        (diagonalSum 3 500) +
+        (diagonalSum 5 500) +
+        (diagonalSum 7 500) +
+        (diagonalSum 9 500) +
+        1
+
+module Problem29 =
+    let answer =
+        seq { 2I..100I }
+        |> Seq.collect (fun a -> seq { 2..100 } |> Seq.map (fun b -> (a, b)))
+        |> Seq.map (fun (a, b) -> pown a b)
+        |> Seq.distinct
+        |> Seq.length
+
+module Problem30 =
+    let isSumOfFifthPowers n =
+        let digitFifthPowerSum =
+            string n
+            |> Seq.map (fun c -> int (string c))
+            |> Seq.map (fun i -> pown i 5)
+            |> Seq.reduce (+)
+
+        digitFifthPowerSum = n
+
+    // The max sum of a 6 digit number is 9^5 * 6 = 354294
+    // This grows slower than the numbers themselves, so we can stop
+    // there
+    let nums =
+        { 10..354294 }
+        |> Seq.filter isSumOfFifthPowers
+
+    let answer = nums |> Seq.sum
+
 module Problem75 =
     // https://en.wikipedia.org/wiki/Tree_of_primitive_Pythagorean_triples
     let pythagoreanTriplesBelow num =

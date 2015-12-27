@@ -26,5 +26,17 @@ let main argv =
     printfn "Problem 19: %A" Problem19.answer
     printfn "Problem 20: %A" Problem20.answer
     printfn "Problem 21: %A" Problem21.answer
+    printfn "Problem 22: %A" Problem22.answer
+    printfn "Problem 23: %A" Problem23.answer
+    printfn "Problem 24: %A" Problem24.answer
+    printfn "Problem 25: %A" Problem25.answer
+    printfn "Problem 26: %A" Problem26.answer
+    printfn "Problem 27: %A" Problem27.answer
+    printfn "Problem 28: %A" Problem28.answer
+    printfn "Problem 29: %A" Problem29.answer
+    printfn "Problem 30: %A" Problem30.answer
+    printfn "Problem 67: %A" Problem18And67.answer67
+    printfn "Problem 75: %A" Problem75.answer
+
     ignore (System.Console.ReadLine ())
     0 // return an integer exit code

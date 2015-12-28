@@ -526,6 +526,47 @@ module Problem30 =
 
     let answer = nums |> Seq.sum
 
+module Problem31 =
+    let coins = [1; 2; 5; 10; 20; 50; 100; 200]
+
+    let waysToMake amount =
+        let rec waysToMakeWithMax amount maxCoin =
+            if amount < 0 then
+                0
+            elif amount = 0 then
+                1
+            else
+                coins
+                |> Seq.filter (fun coin -> coin <= maxCoin)
+                |> Seq.map (fun coin -> waysToMakeWithMax (amount - coin) coin)
+                |> Seq.sum
+
+        waysToMakeWithMax amount (coins |> Seq.max)
+
+    let answer = waysToMake 200
+
+module Problem32 =
+    let permutations = Problem24.permute [|1..9|]
+    let pandigital = seq {
+        for num in permutations |> Seq.map (fun s -> Seq.toArray s) do
+            let intSliced (arr : int[]) =
+                int (System.String.Join("", arr))
+
+            for i = 0 to 6 do
+                for j = i + 1 to 7 do
+                    let multiplicand = intSliced num.[..i]
+                    let multiplier = intSliced num.[(i + 1)..j]
+                    let product = intSliced num.[(j + 1)..]
+
+                    if multiplicand * multiplier = product then
+                        yield product
+    }
+
+    let answer =
+        pandigital
+        |> Seq.distinct
+        |> Seq.sum
+
 module Problem75 =
     // https://en.wikipedia.org/wiki/Tree_of_primitive_Pythagorean_triples
     let pythagoreanTriplesBelow num =

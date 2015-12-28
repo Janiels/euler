@@ -567,6 +567,138 @@ module Problem32 =
         |> Seq.distinct
         |> Seq.sum
 
+module Problem33 =
+    let isCuriousFraction (num, denom) =
+        let numChars num c =
+            string num
+            |> Seq.filter (fun strC -> strC = c)
+            |> Seq.length
+
+        let common =
+            seq { '1'..'9' }
+            |> Seq.filter (fun c -> (numChars num c) = 1 && (numChars denom c) = 1)
+            |> Seq.tryHead
+
+        match common with
+            | Some c ->
+                let cancel n =
+                    let replaced = (string n).Replace((string c), "")
+                    match replaced with
+                        | "" -> 0
+                        | _ -> int replaced
+
+                let cnum, cdenom = (cancel num), (cancel denom)
+
+                if cdenom = 0 then
+                    false
+                else
+                    (decimal cnum) / (decimal cdenom) = (decimal num) / (decimal denom)
+            | None -> false
+
+    let twoDigitSubOneFracs = seq {
+        for i = 10 to 98 do
+            for j = i + 1 to 99 do
+                yield (i, j)
+    }
+
+    let productNum, productDenom =
+        twoDigitSubOneFracs
+        |> Seq.filter isCuriousFraction
+        |> Seq.reduce (fun (num, denom) (i, j) -> (num * i, denom * j))
+
+    let rec gcd x y =
+        if x < y then
+            gcd y x
+        elif y = 0 then
+            x
+        else
+            gcd y (x % y)
+
+    let answer = productDenom / (gcd productNum productDenom)
+
+module Problem34 =
+    // Max value of a number with n digits:
+    // 10^n - 1
+    // Max value of sum of digit factorials:
+    // 9! * n
+    // 10^n - 1 grows much faster than 9! * n.
+    // 9! * 6 = 2177280 means this is an upper bound we need to check
+    // since 7 digits = 10 000 000
+
+    let fac n =
+        if n = 0 then
+            1
+        else
+            seq { 1..n } |> Seq.reduce (*)
+
+    let digitFacSum n =
+        string n
+        |> Seq.map (fun c -> fac (int (string c)))
+        |> Seq.sum
+
+    let answer =
+        seq { 3..2177280 }
+        |> Seq.filter (fun i -> i = digitFacSum i)
+        |> Seq.sum
+
+module Problem35 =
+    let sieve = Problem27.sieve 1000000
+
+    let isCircularPrime n =
+        let rotate (str : string) =
+            str.[1..] + str.[0..0]
+
+        let rec isCircularPrime n left =
+            if left = 0 then
+                true
+            else
+                sieve.[int n] && isCircularPrime (rotate n) (left - 1)
+                
+        isCircularPrime (n.ToString()) (n.ToString().Length)
+
+    let answer =
+        seq { 2..999999 }
+        |> Seq.filter isCircularPrime
+        |> Seq.length
+
+module Problem36 =
+    let rec bin n =
+        match n with
+        | 0 | 1 -> string n
+        | _ -> (bin (n / 2)) + (string (n % 2))
+
+    let isStringPalindrome (s : string) =
+        let chars = s.ToCharArray()
+        chars = Array.rev chars
+
+    let isBinPalindrome n =
+        isStringPalindrome (bin n)
+
+    let isDecPalindrome n =
+        isStringPalindrome (string n)
+
+    let answer =
+        seq { 1..999999 }
+        |> Seq.filter (fun i -> isBinPalindrome i && isDecPalindrome i)
+        |> Seq.sum
+
+module Problem48 =
+    let sum =
+        seq { 1..1000 }
+        |> Seq.map (fun i -> pown (bigint i) i)
+        |> Seq.sum
+
+    let lastN n seq =
+        seq
+        |> Seq.skip (Seq.length seq - n)
+
+    let answer =
+        sum
+        |> string
+        |> lastN 10
+        |> (fun r -> ("", r))
+        |> System.String.Join
+
 module Problem75 =
     // https://en.wikipedia.org/wiki/Tree_of_primitive_Pythagorean_triples
     let pythagoreanTriplesBelow num =

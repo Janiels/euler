@@ -30,6 +30,32 @@ module Primes =
                 let root = int (sqrt (float n))
                 seq {3..2..root} |> Seq.forall (fun i -> n % i <> 0)
 
+module Triangles =
+    // https://en.wikipedia.org/wiki/Tree_of_primitive_Pythagorean_triples
+    let pythagoreanTriplesWithSumBelow num =
+        let rec enumerate (a, b, c) =
+            seq {
+                if a + b + c <= num then
+                    let nextScaled ((a, b, c), i) =
+                        if (a + b + c) * i <= num then
+                            Some((a * i, b * i, c * i), ((a, b, c), i + 1))
+                        else
+                            None
+
+                    yield! Seq.unfold nextScaled ((a, b, c), 1)
+
+                    let a1, b1, c1 = a + -2 * b + 2 * c, 2 * a + -b + 2 * c, 2 * a + -2 * b + 3 * c
+                    yield! enumerate (a1, b1, c1)
+
+                    let a2, b2, c2 = a + 2 * b + 2 * c, 2 * a + b + 2 * c, 2 * a + 2 * b + 3 * c
+                    yield! enumerate (a2, b2, c2)
+
+                    let a3, b3, c3 = -1 * a + 2 * b + 2 * c, -2 * a + b + 2 * c, -2 * a + 2 * b + 3 * c
+                    yield! enumerate (a3, b3, c3)
+            }
+
+        enumerate (3, 4, 5)
+
 module Problem1 =
     let answer =
         seq { 1..999 }
@@ -711,6 +737,33 @@ module Problem38 =
         pandigitalsDecreasing
         |> Seq.find isConcatenatedProduct
 
+module Problem39 =
+    let triangles = Triangles.pythagoreanTriplesWithSumBelow 1001
+
+    let answer =
+        triangles
+        |> Seq.groupBy (fun (a, b, c) -> a + b + c)
+        |> Seq.maxBy (fun (key, seq) -> seq |> Seq.length)
+        |> fst
+
+module Problem40 =
+    let nextDigit (cur, (curString : string)) =
+        let curDigit = int curString.[0..0]
+        let newState =
+            if curString.Length = 1 then
+                (cur + 1, string (cur + 1))
+            else
+                (cur, curString.[1..])
+
+        Some(curDigit, newState) 
+
+    let digitSeq = Seq.unfold nextDigit (1, "1")
+
+    let answer =
+        [1; 10; 100; 1000; 10000; 100000; 1000000]
+        |> Seq.map (fun i -> digitSeq |> Seq.item (i - 1))
+        |> Seq.reduce (*)
+
 module Problem48 =
     let sum =
         seq { 1..1000 }
@@ -729,33 +782,8 @@ module Problem48 =
         |> System.String.Join
 
 module Problem75 =
-    // https://en.wikipedia.org/wiki/Tree_of_primitive_Pythagorean_triples
-    let pythagoreanTriplesBelow num =
-        let rec enumerate (a, b, c) =
-            seq {
-                if a + b + c <= num then
-                    let nextScaled ((a, b, c), i) =
-                        if (a + b + c) * i <= num then
-                            Some((a * i, b * i, c * i), ((a, b, c), i + 1))
-                        else
-                            None
-
-                    yield! Seq.unfold nextScaled ((a, b, c), 1)
-
-                    let a1, b1, c1 = a + -2 * b + 2 * c, 2 * a + -b + 2 * c, 2 * a + -2 * b + 3 * c
-                    yield! enumerate (a1, b1, c1)
-
-                    let a2, b2, c2 = a + 2 * b + 2 * c, 2 * a + b + 2 * c, 2 * a + 2 * b + 3 * c
-                    yield! enumerate (a2, b2, c2)
-
-                    let a3, b3, c3 = -1 * a + 2 * b + 2 * c, -2 * a + b + 2 * c, -2 * a + 2 * b + 3 * c
-                    yield! enumerate (a3, b3, c3)
-            }
-
-        enumerate (3, 4, 5)
-
     let answer =
-        pythagoreanTriplesBelow 1500000
+        Triangles.pythagoreanTriplesWithSumBelow 1500000
         |> Seq.groupBy (fun (a, b, c) -> a + b + c)
         |> Seq.filter (fun (sum, triples) -> (triples |> Seq.length) = 1)
         |> Seq.length

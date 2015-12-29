@@ -682,6 +682,30 @@ module Problem36 =
         |> Seq.filter (fun i -> isBinPalindrome i && isDecPalindrome i)
         |> Seq.sum
 
+module Problem37 =
+    let sieve = Problem27.sieve 10000000
+
+    let isTruncatablePrime n =
+        let rec isTruncatableInDir shift n =
+            if not sieve.[n] then
+                false
+            elif n < 10 then
+                true
+            else
+                isTruncatableInDir shift (shift n)
+
+        let rtl = isTruncatableInDir (fun n -> n / 10)
+        let ltr = isTruncatableInDir (fun n -> int (n.ToString().[1..]))
+
+        rtl n && ltr n
+
+    let answer =
+        seq { 1..9999999 }
+        |> Seq.skipWhile (fun n -> n <= 7)
+        |> Seq.filter isTruncatablePrime
+        |> Seq.take 11
+        |> Seq.sum
+
 module Problem48 =
     let sum =
         seq { 1..1000 }

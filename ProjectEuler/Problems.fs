@@ -1,12 +1,34 @@
 ﻿module Problems
 
+open System
 open System.IO
 
-#if !INTERACTIVE
 let inputFolder = Path.Combine (__SOURCE_DIRECTORY__, "Input")
+#if INTERACTIVE
+#r @"..\Helpers\bin\Release\Helpers.dll"
 #endif
 
 let inputPath (n : int) = Path.Combine (inputFolder, n.ToString () + ".txt")
+
+module Permutations =
+    let unordered seq =
+        Helpers.Permutations.Unordered(seq)
+
+    let ordered seq =
+        Helpers.Permutations.Ordered(seq)
+
+module Primes =
+    let sieve n =
+        Helpers.Primes.Sieve(n)
+
+    let isPrime (n : int) =
+        match n with
+            | _ when n < 2 -> false
+            | 2 -> true
+            | _ when n % 2 = 0 -> false
+            | _ -> 
+                let root = int (sqrt (float n))
+                seq {3..2..root} |> Seq.forall (fun i -> n % i <> 0)
 
 module Problem1 =
     let answer =
@@ -23,18 +45,12 @@ module Problem2 =
         |> Seq.sum
 
 module Problem3 =
-    let isPrime (n : int) =
-        if n % 2 = 0 then false
-        else
-            let root = int (sqrt (float n))
-            seq {3..2..root} |> Seq.forall (fun i -> n % i <> 0)
-
     let num = 600851475143L
     let root = int (sqrt (float num))
     let answer =
         seq {2..root}
         |> Seq.filter (fun i -> num % (int64 i) = 0L)
-        |> Seq.filter isPrime
+        |> Seq.filter Primes.isPrime
         |> Seq.max
 
 module Problem4 =
@@ -79,15 +95,9 @@ module Problem6 =
     let answer = squareOfSum - sumOfSquare
 
 module Problem7 =
-    let isPrime n =
-        if n % 2 = 0 then false
-        else
-            let root = int (sqrt (float n))
-            seq {3..2..root} |> Seq.forall (fun i -> n % i <> 0)
-
     let answer =
         Seq.initInfinite (fun i -> 3 + i)
-        |> Seq.filter isPrime
+        |> Seq.filter Primes.isPrime
         |> Seq.item 9999 // we don't include 2 in this list
 
 module Problem8 =
@@ -119,16 +129,9 @@ module Problem9 =
     let answer = i * j * k
 
 module Problem10 =
-    let isPrime n =
-        if n = 2 then true
-        elif n % 2 = 0 then false
-        else
-            let root = int (sqrt (float n))
-            seq {3..2..root} |> Seq.forall (fun i -> n % i <> 0)
-
     let answer =
         seq { 2..1999999 }
-        |> Seq.filter isPrime
+        |> Seq.filter Primes.isPrime
         |> Seq.map (fun i -> (int64 i))
         |> Seq.sum
 
@@ -388,24 +391,8 @@ module Problem23 =
         |> Seq.sum
 
 module Problem24 =
-    let rec permute (arr : 'a[]) =
-        if arr.Length = 1 then
-            Seq.singleton (Seq.ofArray arr)
-        else
-            seq {
-                for i = 0 to arr.Length - 1 do
-                    let without =
-                        if i = 0 then
-                            arr.[i+1..]
-                        else
-                            Array.append arr.[..i-1] arr.[i+1..]
-
-                    for subSeq in (permute without) do
-                        yield Seq.append (Seq.singleton arr.[i]) subSeq
-            } 
-
     let millionth =
-        permute [|0..9|]
+        Permutations.ordered [|0..9|]
         |> Seq.item 999999
 
     let answer =
@@ -439,19 +426,7 @@ module Problem26 =
         |> Seq.maxBy periodLength
 
 module Problem27 =
-    let sieve (n:int) =
-        let arr = (Array.init n (fun i -> true))
-        arr.[0] <- false
-        arr.[1] <- false
-        for i = 2 to n do
-            let mutable j = 2
-            while i * j < n do
-                arr.[i * j] <- false
-                j <- j + 1
-
-        arr
-
-    let primes = sieve 100000
+    let primes = Primes.sieve 100000
 
     let isPrime n =
         if n < 0 then
@@ -546,7 +521,7 @@ module Problem31 =
     let answer = waysToMake 200
 
 module Problem32 =
-    let permutations = Problem24.permute [|1..9|]
+    let permutations = Permutations.unordered [|1..9|]
     let pandigital = seq {
         for num in permutations |> Seq.map (fun s -> Seq.toArray s) do
             let intSliced (arr : int[]) =
@@ -642,7 +617,7 @@ module Problem34 =
         |> Seq.sum
 
 module Problem35 =
-    let sieve = Problem27.sieve 1000000
+    let sieve = Primes.sieve 1000000
 
     let isCircularPrime n =
         let rotate (str : string) =
@@ -683,7 +658,7 @@ module Problem36 =
         |> Seq.sum
 
 module Problem37 =
-    let sieve = Problem27.sieve 10000000
+    let sieve = Primes.sieve 10000000
 
     let isTruncatablePrime n =
         let rec isTruncatableInDir shift n =
@@ -705,6 +680,36 @@ module Problem37 =
         |> Seq.filter isTruncatablePrime
         |> Seq.take 11
         |> Seq.sum
+
+module Problem38 =
+    let isPandigital n =
+        string n
+        |> Seq.groupBy id
+        |> Seq.forall (fun (c, chars) -> chars |> Seq.length = 1)
+        && (string n).Length = 9
+
+    let pandigitalsDecreasing =
+        Permutations.ordered [| 9..-1..1 |]
+        |> Seq.map (fun n -> int (System.String.Join("", n)))
+
+    let isConcatenatedProduct n =
+        let rec isConcatenatedProductWithSeed seed mul numberString =
+            match numberString with
+                | "" -> true
+                | _ ->
+                    let next = string (seed * mul)
+                    if numberString.StartsWith(next) then
+                        isConcatenatedProductWithSeed seed (mul + 1) (numberString.Substring(next.Length))
+                    else
+                        false
+
+        let numberString = string n
+        { 1.. (numberString.Length - 1) }
+        |> Seq.exists (fun len -> isConcatenatedProductWithSeed (int (numberString.Remove(len))) 1 numberString)
+
+    let answer =
+        pandigitalsDecreasing
+        |> Seq.find isConcatenatedProduct
 
 module Problem48 =
     let sum =

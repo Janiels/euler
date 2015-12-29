@@ -1,4 +1,6 @@
-﻿namespace Helpers
+﻿using System;
+
+namespace Helpers
 {
 	public static class Primes
 	{
@@ -11,15 +13,15 @@
 			sieve[0] = false;
 			sieve[1] = false;
 
-			for (int i = 2; i < sieve.Length; i++)
+			int bound = (int)Math.Sqrt(max);
+			for (int i = 2; i <= bound; i++)
 			{
-				for (int j = 2;; j++)
-				{
-					int index = i*j;
-					if (index >= sieve.Length)
-						break;
+				if (!sieve[i])
+					continue;
 
-					sieve[index] = false;
+				for (int j = i + i; j < sieve.Length; j += i)
+				{
+					sieve[j] = false;
 				}
 			}
 

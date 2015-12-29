@@ -535,7 +535,7 @@ module Problem32 =
 
                     if multiplicand * multiplier = product then
                         yield product
-    }
+    }  
 
     let answer =
         pandigital

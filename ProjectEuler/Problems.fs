@@ -787,6 +787,24 @@ module Problem42 =
         |> Seq.filter isTriangleWord
         |> Seq.length
 
+module Problem43 =
+    let pandigitals =
+        Permutations.unordered [|0..9|]
+        |> Seq.map (fun i -> int64 (System.String.Join("", i)))
+
+    let hasProperty n =
+        string n
+        |> Seq.map (fun c -> int (string c))
+        |> Seq.skip 1
+        |> Seq.windowed 3
+        |> Seq.zip [2;3;5;7;11;13;17]
+        |> Seq.forall (fun (prime, window) -> (int (System.String.Join("", window))) % prime = 0)
+
+    let answer =
+        pandigitals
+        |> Seq.filter hasProperty
+        |> Seq.length
+
 module Problem48 =
     let sum =
         seq { 1..1000 }

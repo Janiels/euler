@@ -747,22 +747,25 @@ module Problem39 =
         |> fst
 
 module Problem40 =
-    let nextDigit (cur, (curString : string)) =
-        let curDigit = int curString.[0..0]
-        let newState =
-            if curString.Length = 1 then
-                (cur + 1, string (cur + 1))
-            else
-                (cur, curString.[1..])
-
-        Some(curDigit, newState) 
-
-    let digitSeq = Seq.unfold nextDigit (1, "1")
+    let digitSeq =
+        Seq.initInfinite (fun i -> 1 + i)
+        |> Seq.collect (fun i -> string i)
+        |> Seq.map int
 
     let answer =
         [1; 10; 100; 1000; 10000; 100000; 1000000]
         |> Seq.map (fun i -> digitSeq |> Seq.item (i - 1))
         |> Seq.reduce (*)
+
+module Problem41 =
+    let pandigitalsDecreasing =
+        { 9..-1..1 }
+        |> Seq.collect (fun i -> Permutations.ordered [|i .. -1 .. 1|] |> Seq.map (fun perm -> int (System.String.Join("", perm))))
+
+    let answer =
+        pandigitalsDecreasing
+        |> Seq.filter Primes.isPrime
+        |> Seq.head
 
 module Problem48 =
     let sum =

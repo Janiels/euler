@@ -767,6 +767,26 @@ module Problem41 =
         |> Seq.filter Primes.isPrime
         |> Seq.head
 
+module Problem42 =
+    let isTriangleNumber n =
+        let index = -1.0/2.0 + (sqrt (1.0/4.0 + 2.0 * (float n)))
+        index = (float (int index))
+
+    let words = File.ReadAllText(inputPath 42).Replace("\"", "").Split(',')
+
+    let isTriangleWord word =
+        let wordSum =
+            word
+            |> Seq.map (fun c -> (int c) - (int 'A') + 1)
+            |> Seq.sum
+
+        isTriangleNumber wordSum
+
+    let answer =
+        words
+        |> Seq.filter isTriangleWord
+        |> Seq.length
+
 module Problem48 =
     let sum =
         seq { 1..1000 }

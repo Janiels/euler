@@ -790,6 +790,7 @@ module Problem42 =
 module Problem43 =
     let pandigitals =
         Permutations.unordered [|0..9|]
+        |> Seq.filter (fun num -> num.[0] <> 0)
         |> Seq.map (fun i -> int64 (System.String.Join("", i)))
 
     let hasProperty n =
@@ -803,7 +804,28 @@ module Problem43 =
     let answer =
         pandigitals
         |> Seq.filter hasProperty
-        |> Seq.length
+        |> Seq.sum
+
+module Problem44 =
+    let pentagonals =
+        Seq.initInfinite (fun n -> 1 + n)
+        |> Seq.map (fun n -> n * (3 * n - 1) / 2)
+
+    let isPentagonal n =
+        let index = int64 (System.Math.Round(1.0/6.0 + sqrt(1.0/36.0 + 2.0/3.0 * (float n))))
+        (index * (3L * index - 1L) / 2L) = n
+
+module Problem45 =
+    let isHexagonal n =
+        let index = int64 (System.Math.Round(1.0/4.0 + sqrt(1.0 + 8.0* (float n)) / 4.0))
+        (index * (2L * index - 1L)) = n
+
+    let triangularNumbers = Seq.unfold (fun n -> Some(n*(n+1L)/2L, n + 1L)) 1L
+
+    let answer =
+        triangularNumbers
+        |> Seq.skipWhile (fun i -> i <= 40755L)
+        |> Seq.find (fun n -> (isHexagonal n) && (Problem44.isPentagonal n))
 
 module Problem48 =
     let sum =

@@ -827,6 +827,17 @@ module Problem45 =
         |> Seq.skipWhile (fun i -> i <= 40755L)
         |> Seq.find (fun n -> (isHexagonal n) && (Problem44.isPentagonal n))
 
+module Problem52 =
+    let areSameDigits n1 n2 =
+        string n1
+        |> Seq.sort
+        |> Seq.compareWith Operators.compare (string n2 |> Seq.sort)
+        |> (=) 0
+
+    let answer =
+        Seq.initInfinite (fun i -> 1 + i)
+        |> Seq.find (fun i -> {2..6} |> Seq.forall (fun mul -> areSameDigits i (i * mul)))
+
 module Problem48 =
     let sum =
         seq { 1..1000 }

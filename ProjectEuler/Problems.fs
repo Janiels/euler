@@ -844,6 +844,32 @@ module Problem48 =
         |> (fun r -> ("", r))
         |> System.String.Join
 
+module Problem50 =
+    let sieve = Primes.sieve 1000000
+
+    let cumSums =
+        sieve
+        |> Seq.mapi (fun i isPrime -> i, isPrime)
+        |> Seq.filter (fun (_, isPrime) -> isPrime)
+        |> Seq.map (fun (i, _) -> i)
+        |> Seq.scan (+) 0
+        |> Seq.toArray
+
+    let bestStartingFrom i =
+        let highestIndex =
+            {i..cumSums.Length - 1}
+            |> Seq.takeWhile (fun j -> cumSums.[j] - cumSums.[i] < 1000000)
+            |> Seq.filter (fun j -> sieve.[cumSums.[j] - cumSums.[i]])
+            |> Seq.append [i]
+            |> Seq.max
+
+        (highestIndex - i, cumSums.[highestIndex] - cumSums.[i])
+
+    let (consecutive, answer) =
+        {0..cumSums.Length - 1}
+        |> Seq.map bestStartingFrom
+        |> Seq.maxBy (fun (num, prime) -> num)
+
 module Problem52 =
     let areSameDigits n1 n2 =
         string n1

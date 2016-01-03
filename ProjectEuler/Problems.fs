@@ -881,6 +881,18 @@ module Problem52 =
         Seq.initInfinite (fun i -> 1 + i)
         |> Seq.find (fun i -> {2..6} |> Seq.forall (fun mul -> areSameDigits i (i * mul)))
 
+module Problem56 =
+    let digitalSum (a : bigint) b =
+        let result = pown a b
+        string result
+        |> Seq.map (fun c -> (int c) - (int '0'))
+        |> Seq.sum
+
+    let answer =
+        {1I..99I}
+        |> Seq.map (fun a -> {1..99} |> Seq.map (digitalSum a) |> Seq.max)
+        |> Seq.max
+
 module Problem75 =
     let answer =
         Triangles.pythagoreanTriplesWithSumBelow 1500000

@@ -9,6 +9,13 @@ namespace Helpers
 	    public static IEnumerable<T[]> Unordered<T>(IEnumerable<T> input)
 	    {
 		    T[] x = input.ToArray();
+		    if (x.Length == 0)
+			    yield break;
+		    if (x.Length == 1)
+		    {
+				yield return x;
+			    yield break;
+		    }
 
 		    int[] c = new int[x.Length];
 

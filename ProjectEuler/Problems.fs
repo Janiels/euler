@@ -807,13 +807,35 @@ module Problem43 =
         |> Seq.sum
 
 module Problem44 =
+    let pentagonal i =
+        i * (3L * i - 1L) / 2L
+
     let pentagonals =
-        Seq.initInfinite (fun n -> 1 + n)
-        |> Seq.map (fun n -> n * (3 * n - 1) / 2)
+        Seq.unfold (fun i -> Some(pentagonal i, i + 1L)) 1L
 
     let isPentagonal n =
-        let index = int64 (System.Math.Round(1.0/6.0 + sqrt(1.0/36.0 + 2.0/3.0 * (float n))))
-        (index * (3L * index - 1L) / 2L) = n
+        if n <= 0L then
+            false
+        else
+            let index = int64 (System.Math.Round(1.0/6.0 + sqrt(1.0/36.0 + 2.0/3.0 * (float n))))
+            pentagonal index = n
+
+    let test =
+        pentagonals
+        |> Seq.collect (fun p1 -> pentagonals|> Seq.skipWhile (fun p2 -> p2 <= p1) |> Seq.take 10000 |> Seq.map (fun p2 -> p1, p2))
+        |> Seq.filter (fun (p1, p2) -> isPentagonal (p2 - p1) && isPentagonal (p1 + p2))
+
+    let pentagonalsUntilDistTooLarge distance =
+        pentagonals
+        |> Seq.mapi (fun i p -> int64 i, p)
+        |> Seq.takeWhile (fun (i, p) -> p + distance >= pentagonal (i + 2L))
+        |> Seq.map (fun (i, p) -> p)
+        
+    let answer =
+        pentagonals
+        |> Seq.map (fun dist -> dist, (pentagonalsUntilDistTooLarge dist))
+        |> Seq.collect (fun (dist, nums) -> nums |> Seq.map (fun num -> dist, num, num + dist))
+        |> Seq.filter (fun (dist, a, b) -> isPentagonal b && isPentagonal (a + b))
 
 module Problem45 =
     let isHexagonal n =
@@ -843,6 +865,31 @@ module Problem48 =
         |> lastN 10
         |> (fun r -> ("", r))
         |> System.String.Join
+
+module Problem49 =
+    let sieve = Primes.sieve 9999
+
+    let findConsecutiveEqDiff (array : int[]) =
+        let diffs =
+            array
+            |> Seq.mapi (fun i v -> { i + 1..array.Length - 1} |> Seq.map (fun i2 -> (array.[i2] - v)))
+            |> Seq.collect id
+            |> Seq.distinct
+
+        array
+        |> Seq.collect (fun v -> diffs |> Seq.map (fun d -> (v, v + d, v + 2 * d)))
+        |> Seq.filter (fun (a, b, c) -> array |> Array.contains b && array |> Array.contains c)
+
+    let answer =
+        sieve
+        |> Seq.mapi (fun n isPrime -> n, isPrime)
+        |> Seq.filter (fun (n, isPrime) -> isPrime)
+        |> Seq.map (fun (n, _) -> string n |> Permutations.unordered)
+        |> Seq.map (fun permuts -> permuts |> Seq.map (fun permut -> int (System.String.Join("", permut))))
+        |> Seq.map (fun permuts -> permuts |> Seq.filter (fun n -> sieve.[n]) |> Seq.distinct |> Seq.sort |> Seq.toArray)
+        |> Seq.filter (fun permuts -> permuts.Length >= 3 && permuts.[0] >= 1000)
+        |> Seq.collect findConsecutiveEqDiff
+        |> Seq.distinct
 
 module Problem50 =
     let sieve = Primes.sieve 1000000

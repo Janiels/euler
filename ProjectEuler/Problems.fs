@@ -818,24 +818,19 @@ module Problem44 =
             false
         else
             let index = int64 (System.Math.Round(1.0/6.0 + sqrt(1.0/36.0 + 2.0/3.0 * (float n))))
-            pentagonal index = n
+            pentagonal index = n || pentagonal (index + 1L) = n || pentagonal (index - 1L) = n
 
-    let test =
-        pentagonals
-        |> Seq.collect (fun p1 -> pentagonals|> Seq.skipWhile (fun p2 -> p2 <= p1) |> Seq.take 10000 |> Seq.map (fun p2 -> p1, p2))
-        |> Seq.filter (fun (p1, p2) -> isPentagonal (p2 - p1) && isPentagonal (p1 + p2))
+    let pentagonalsWhereSumCouldBePentagonal otherPentagonal =
+        Seq.unfold (fun i -> Some(pentagonal i, i + 1L)) 1L
+        |> Seq.takeWhile (fun i -> pentagonal i + otherPentagonal >= pentagonal (i + 1L))
+        |> Seq.map pentagonal
 
-    let pentagonalsUntilDistTooLarge distance =
-        pentagonals
-        |> Seq.mapi (fun i p -> int64 i, p)
-        |> Seq.takeWhile (fun (i, p) -> p + distance >= pentagonal (i + 2L))
-        |> Seq.map (fun (i, p) -> p)
-        
     let answer =
         pentagonals
-        |> Seq.map (fun dist -> dist, (pentagonalsUntilDistTooLarge dist))
-        |> Seq.collect (fun (dist, nums) -> nums |> Seq.map (fun num -> dist, num, num + dist))
-        |> Seq.filter (fun (dist, a, b) -> isPentagonal b && isPentagonal (a + b))
+        |> Seq.collect (fun a -> pentagonalsWhereSumCouldBePentagonal a |> Seq.map (fun b -> a, b))
+        |> Seq.filter (fun (a, b) -> isPentagonal b)
+        |> Seq.filter (fun (a, b) -> isPentagonal (a + b))
+        |> Seq.head
 
 module Problem45 =
     let isHexagonal n =
@@ -848,6 +843,26 @@ module Problem45 =
         triangularNumbers
         |> Seq.skipWhile (fun i -> i <= 40755L)
         |> Seq.find (fun n -> (isHexagonal n) && (Problem44.isPentagonal n))
+
+module Problem46 =
+    let sieve = Primes.sieve 10000000
+    let isPrime n =
+        if n < 0 then
+            false
+        else
+            sieve.[n]
+
+    let squaresBelow n = seq {
+        let mutable i = 1
+        while i * i < n do
+            yield i * i
+            i <- i + 1
+        }
+
+    let answer =
+        Seq.unfold (fun cur -> Some(cur + 2, cur + 2)) 3
+        |> Seq.filter (fun num -> not (sieve.[num]))
+        |> Seq.find (fun num -> squaresBelow num |> Seq.forall (fun square -> (not << isPrime) (num - 2 * square)))
 
 module Problem48 =
     let sum =

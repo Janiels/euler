@@ -943,6 +943,23 @@ module Problem52 =
         Seq.initInfinite (fun i -> 1 + i)
         |> Seq.find (fun i -> {2..6} |> Seq.forall (fun mul -> areSameDigits i (i * mul)))
 
+module Problem53 =
+    let nChooseR n r =
+        let fac n =
+            if n = 0I then
+                1I
+            else
+                seq {1I..n} |> Seq.reduce (*)
+
+        (fac n) / ((fac r) * (fac (n - r)))
+
+    let answer =
+        seq {1I..100I}
+        |> Seq.collect (fun n -> seq {1I..n} |> Seq.map (fun r -> n, r))
+        |> Seq.map (fun (n, r) -> nChooseR n r)
+        |> Seq.filter (fun amount -> amount > 1000000I)
+        |> Seq.length
+
 module Problem56 =
     let digitalSum (a : bigint) b =
         let result = pown a b

@@ -960,6 +960,34 @@ module Problem53 =
         |> Seq.filter (fun amount -> amount > 1000000I)
         |> Seq.length
 
+module Problem55 =
+    let isLychrelNumber (n : bigint) =
+        let isPalindrome (n : bigint) =
+            let chars = (string n) |> Seq.toArray
+            chars = Array.rev chars
+
+        let rec isLychrelNumberInIts (n : bigint) its =
+            let reversed =
+                string n
+                |> Seq.rev
+                |> Seq.map string
+                |> Seq.reduce (+)
+
+            let next = n + (bigint.Parse reversed)
+            if isPalindrome next then
+                false
+            elif its = 1 then
+                true
+            else
+                isLychrelNumberInIts next (its - 1)
+
+        isLychrelNumberInIts n 50
+
+    let answer =
+        seq {1I..9999I}
+        |> Seq.filter isLychrelNumber
+        |> Seq.length
+
 module Problem56 =
     let digitalSum (a : bigint) b =
         let result = pown a b

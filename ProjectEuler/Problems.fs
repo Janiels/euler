@@ -1000,6 +1000,64 @@ module Problem56 =
         |> Seq.map (fun a -> {1..99} |> Seq.map (digitalSum a) |> Seq.max)
         |> Seq.max
 
+module Problem59 =
+    let chars =
+        File.ReadAllText(inputPath 59).Split(',')
+        |> Seq.map int
+
+    let decrypted (key : string) =
+        let repeatedKey = seq {
+            while true do
+                for c in key do
+                    yield c
+        }
+
+        let chars =
+            Seq.zip chars repeatedKey
+            |> Seq.map (fun (c, keyC) -> c ^^^ (int keyC))
+            |> Seq.map char
+
+        System.String.Join("", chars)
+
+    let allKeys = seq {
+        for a in seq { 'a'..'z' } do
+            for b in seq { 'a'..'z' } do
+                for c in seq { 'a'..'z' } do
+                    yield (string a) + (string b) + (string c)
+    }
+
+    let isCandidate (decrypted : string) =
+        let decryptedLower = decrypted.ToLower()
+        let histogram =
+            decryptedLower
+            |> Seq.groupBy id
+            |> Seq.map (fun (key, seq) -> key, Seq.length seq)
+
+        let best =
+            histogram
+            |> Seq.sortByDescending (fun (key, len) -> len)
+            |> Seq.map (fun (key, len) -> key)
+            |> Seq.take 10
+            |> Set.ofSeq
+
+        [' '; 'e'; 't'; 'a'; 'o'; 'i']
+        |> Seq.forall (fun c -> Set.contains c best)
+        &&
+        ['/'; '$'; '%'; '~'; '{']
+        |> Seq.forall (fun c -> not (decryptedLower.Contains(string c)))
+
+    let best =
+        allKeys
+        |> Seq.map (fun key -> key, (decrypted key))
+        |> Seq.filter (fun (key, str) -> isCandidate str)
+        |> Seq.map (fun (key, str) -> key)
+        |> Seq.head
+
+    let answer =
+        decrypted best
+        |> Seq.map int
+        |> Seq.sum
+
 module Problem75 =
     let answer =
         Triangles.pythagoreanTriplesWithSumBelow 1500000

@@ -21,6 +21,9 @@ module Primes =
     let sieve n =
         Helpers.Primes.Sieve(n)
 
+    let primeFactorSieve n =
+        Helpers.Primes.PrimeFactorSieve(n)
+
     let isPrime (n : int) =
         match n with
             | _ when n < 2 -> false
@@ -863,6 +866,17 @@ module Problem46 =
         Seq.unfold (fun cur -> Some(cur + 2, cur + 2)) 3
         |> Seq.filter (fun num -> not (sieve.[num]))
         |> Seq.find (fun num -> squaresBelow num |> Seq.forall (fun square -> (not << isPrime) (num - 2 * square)))
+
+module Problem47 =
+    let sieve = Primes.primeFactorSieve 1000000
+
+    let answer =
+        sieve
+        |> Seq.mapi (fun i factors -> i, factors)
+        |> Seq.windowed 4
+        |> Seq.filter (fun pairs -> pairs |> Seq.forall (fun (_, numPrimeFactors) -> numPrimeFactors = 4))
+        |> Seq.map(fun [|(num, _); _; _; _|] -> num)
+        |> Seq.head
 
 module Problem48 =
     let sum =

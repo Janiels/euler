@@ -27,5 +27,24 @@ namespace Helpers
 
 			return sieve;
 		}
+
+		public static int[] PrimeFactorSieve(int max)
+		{
+			int[] sieve = new int[max];
+			sieve[0] = 0;
+			sieve[1] = 1;
+
+			int bound = (int)Math.Sqrt(max);
+			for (int i = 2; i <= bound; i++)
+			{
+				if (sieve[i] != 0)
+					continue; // Composite
+
+				for (int j = i; j < sieve.Length; j += i)
+					sieve[j]++;
+			}
+
+			return sieve;
+		}
 	}
 }

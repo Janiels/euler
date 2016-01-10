@@ -1078,3 +1078,20 @@ module Problem75 =
         |> Seq.groupBy (fun (a, b, c) -> a + b + c)
         |> Seq.filter (fun (sum, triples) -> (triples |> Seq.length) = 1)
         |> Seq.length
+
+module Problem99 =
+    let logExponent (a : int) (b : int) =
+        (float b) * (log10 (float a))
+
+    let lines = File.ReadAllLines(inputPath 99)
+    let parseLine (line : string) =
+        let split = line.Split(',')
+        (int split.[0]), (int split.[1])
+
+    let byLargest =
+        lines
+        |> Seq.map parseLine
+        |> Seq.mapi (fun i ab -> i + 1, ab)
+        |> Seq.sortByDescending (fun (_, (a, b)) -> logExponent a b)
+
+    let (answer, _) = Seq.head byLargest

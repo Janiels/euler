@@ -820,20 +820,27 @@ module Problem44 =
         if n <= 0L then
             false
         else
-            let index = int64 (System.Math.Round(1.0/6.0 + sqrt(1.0/36.0 + 2.0/3.0 * (float n))))
-            pentagonal index = n || pentagonal (index + 1L) = n || pentagonal (index - 1L) = n
+            let index = int64 (1.0/6.0 + sqrt(1.0/36.0 + 2.0/3.0 * (float n)) + 0.5)
+            pentagonal index = n
 
-    let pentagonalsWhereSumCouldBePentagonal otherPentagonal =
-        Seq.unfold (fun i -> Some(pentagonal i, i + 1L)) 1L
-        |> Seq.takeWhile (fun i -> pentagonal i + otherPentagonal >= pentagonal (i + 1L))
-        |> Seq.map pentagonal
+    let hasSolution diff =
+        let rec hasSolution (curIndex : int64) (curPent : int64) =
+            let pent2 = curPent + diff
+            if isPentagonal pent2 && isPentagonal (curPent + pent2) then
+                true
+            else
+                let nextIndex = curIndex + 1L
+                let nextPent = pentagonal nextIndex
+                if nextPent - curPent > diff then
+                    false
+                else
+                    hasSolution nextIndex nextPent
+
+        hasSolution 1L (pentagonal 1L)
 
     let answer =
         pentagonals
-        |> Seq.collect (fun a -> pentagonalsWhereSumCouldBePentagonal a |> Seq.map (fun b -> a, b))
-        |> Seq.filter (fun (a, b) -> isPentagonal b)
-        |> Seq.filter (fun (a, b) -> isPentagonal (a + b))
-        |> Seq.head
+        |> Seq.find hasSolution
 
 module Problem45 =
     let isHexagonal n =

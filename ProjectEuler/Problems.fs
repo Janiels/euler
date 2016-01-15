@@ -1086,6 +1086,20 @@ module Problem75 =
         |> Seq.filter (fun (sum, triples) -> (triples |> Seq.length) = 1)
         |> Seq.length
 
+module Problem97 =
+    let lastNDigits num n =
+        let numStr = string num
+        let digits =
+            if numStr.Length < 10 then
+                numStr
+            else
+                numStr.Substring(numStr.Length - 10)
+
+        int64(digits)
+
+    let twoExpos = Seq.unfold (fun cur -> Some(cur, lastNDigits (cur * 2L) 10)) 1L
+    let answer = lastNDigits (twoExpos |> Seq.item 7830457 |> ((*) 28433L) |> ((+) 1L)) 10
+
 module Problem99 =
     let logExponent (a : int) (b : int) =
         (float b) * (log10 (float a))

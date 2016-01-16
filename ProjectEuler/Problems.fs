@@ -1086,6 +1086,24 @@ module Problem75 =
         |> Seq.filter (fun (sum, triples) -> (triples |> Seq.length) = 1)
         |> Seq.length
 
+module Problem92 =
+    let rec finishNum = function
+        | 1 -> 1
+        | 89 -> 89
+        | n ->
+            let nextNum =
+                string n
+                |> Seq.map string
+                |> Seq.map int
+                |> Seq.map (fun i -> i * i)
+                |> Seq.reduce (+)
+            finishNum nextNum
+
+    let answer =
+        seq { 1..9999999 }
+        |> Seq.filter (fun n -> finishNum n = 89)
+        |> Seq.length
+
 module Problem97 =
     let lastNDigits num n =
         let numStr = string num
